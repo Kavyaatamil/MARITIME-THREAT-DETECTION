@@ -1,0 +1,152 @@
+
+
+
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+import seaborn as sns
+import time
+
+# ----------------------
+# 1. DATA LOADING MODULE
+# ----------------------
+def load_data():
+    """
+    Load or simulate datasets for sonar, radar, AIS, and visual inputs.
+
+    Returns:
+        sonar_data (pd.DataFrame): Sonar features and labels (rock, mine, diver).
+        surface_data (pd.DataFrame): Surface vessel data (normal, pirate).
+    """
+    # Placeholder: Simulated sonar data (rock, mine, diver)
+    sonar_data = pd.DataFrame(
+        np.random.rand(1000, 10), # 10 sonar features
+        columns=[f"feature_{i}" for i in range(10)]
+    )
+    sonar_data['label'] = np.random.choice(['rock', 'mine', 'diver'], size=1000)
+
+    # Placeholder: Simulated surface data (radar, AIS, visual)
+    surface_data = pd.DataFrame(
+        np.random.rand(1000, 15), # 15 surface features
+        columns=[f"feature_{i}" for i in range(15)]
+    )
+    surface_data['label'] = np.random.choice(['normal_vessel', 'pirate'], size=1000)
+
+    return sonar_data, surface_data
+
+# ----------------------
+# 2. MACHINE LEARNING MODELS
+# ----------------------
+def train_sonar_model(data):
+    """
+    Train a model to classify sonar data.
+
+    Args:
+        data (pd.DataFrame): Sonar dataset.
+
+    Returns:
+        model (RandomForestClassifier): Trained model.
+    """
+    X = data.iloc[:, :-1]
+    y = data['label']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    print("Sonar Model Performance:")
+    print(classification_report(y_test, model.predict(X_test)))
+    return model
+
+def train_surface_model(data):
+    """
+    Train a model to classify surface-level data (radar, AIS, visual).
+
+    Args:
+        data (pd.DataFrame): Surface dataset.
+
+    Returns:
+        model (RandomForestClassifier): Trained model.
+    """
+    X = data.iloc[:, :-1]
+    y = data['label']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    print("Surface Model Performance:")
+    print(classification_report(y_test, model.predict(X_test)))
+    return model
+
+# ----------------------
+# 3. REAL-TIME ALERT SYSTEM
+# ----------------------
+def detect_threat(sonar_model, surface_model, sonar_input, surface_input):
+    """
+    Real-time threat detection using trained models.
+
+    Args:
+        sonar_model: Trained sonar classifier.
+        surface_model: Trained surface classifier.
+        sonar_input (np.array): Incoming sonar data.
+        surface_input (np.array): Incoming surface data.
+
+    Returns:
+        alert (str): Detected threat or safe status.
+    """
+    sonar_prediction = sonar_model.predict([sonar_input])[0]
+    surface_prediction = surface_model.predict([surface_input])[0]
+
+    if sonar_prediction == 'mine' or surface_prediction == 'pirate':
+        alert = f"THREAT DETECTED: {sonar_prediction} | {surface_prediction}"
+    else:
+        alert = "No threat detected."
+
+    return alert
+
+# ----------------------
+# 4. VISUALIZATION DASHBOARD
+# ----------------------
+def visualize_data(sonar_data, surface_data):
+    """
+    Visualize the datasets to understand patterns.
+
+    Args:
+        sonar_data (pd.DataFrame): Sonar dataset.
+        surface_data (pd.DataFrame): Surface dataset.
+    """
+    sns.pairplot(sonar_data, hue='label')
+    plt.title("Sonar Data Visualization")
+    plt.show()
+
+    sns.pairplot(surface_data, hue='label')
+    plt.title("Surface Data Visualization")
+    plt.show()
+
+# ----------------------
+# MAIN FUNCTION
+# ----------------------
+if __name__ == "__main__":
+    print("Loading data...")
+    sonar_data, surface_data = load_data()
+
+    print("Training models...")
+    sonar_model = train_sonar_model(sonar_data)
+    surface_model = train_surface_model(surface_data)
+
+    print("Visualizing data...")
+    visualize_data(sonar_data, surface_data)
+
+    print("Simulating real-time detection...")
+    # Simulate incoming data
+    sonar_input = np.random.rand(10) # Random sonar data
+    surface_input = np.random.rand(15) # Random surface data
+
+
+    alert = detect_threat(sonar_model, surface_model, sonar_input, surface_input)
+    print(alert)
